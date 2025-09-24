@@ -1,0 +1,135 @@
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/date-input/macro.njk" import govukDateInput %}
+{% from "govuk/components/select/macro.njk" import govukSelect %}
+
+{% extends "template.njk" %}
+
+{% block content %}
+<a href="/" class="govuk-back-link">Back to Task List</a>
+  <h1 class="govuk-heading-m">{% if task %}Edit Task{% else %}Create Task{% endif %}</h1>
+  {% if error %}
+    <div class="govuk-error-summary" aria-labelledby="error-summary-title" role="alert" tabindex="-1">
+      <h2 class="govuk-error-summary__title" id="error-summary-title">There is a problem</h2>
+      <div class="govuk-error-summary__body">
+        <ul class="govuk-list govuk-error-summary__list">
+          <li>{{ error }}</li>
+        </ul>
+      </div>
+    </div>
+  {% endif %}
+  <form method="POST" action="{% if task %}/tasks/{{ task.id }}?_method=PATCH{% else %}/tasks{% endif %}" id="task-form" novalidate>
+   {% set isDisabled = task is not none %}
+    {{ govukInput({
+      label: { text: "Title" },
+      id: "title",
+      name: "title",
+      value: task.title,
+      classes: "govuk-input--width-10",
+      disabled: isDisabled,
+      attributes: {
+    required: true,
+    maxlength: 100
+  },
+  errorMessage: error and error.field == "title" and { text: error.message }
+    }) }}
+    {{ govukInput({
+          label: { text: "Description" },
+          id: "description",
+          name: "description",
+          value: task.description,
+          classes: "govuk-input--width-10",
+          disabled: isDisabled
+        }) }}
+ {% if task %}
+{% set time = task and task.dueDate.split('-')[2].split('T')[1] %}
+{% set day = task and task.dueDate.split('-')[2].split('T')[0] %}
+{% set month = task and task.dueDate.split('-')[1] %}
+{% set year = task and task.dueDate.split('-')[0] %}
+ {% endif %}
+      <div class="govuk-form-group">
+        <fieldset class="govuk-fieldset" aria-describedby="due-date-hint">
+          <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
+            <h2 class="govuk-fieldset__heading">Due Date</h2>
+          </legend>
+          <p class="govuk-body">27 03 2007</p>
+          <div class="govuk-date-input" id="due-date">
+            <div class="govuk-date-input__item">
+              {{ govukInput({
+                label: { text: "Day" },
+                id: "due-date-day",
+                name: "due-date-day",
+                value: day,
+                classes: "govuk-input--width-2",
+                disabled: isDisabled,
+                attributes: {
+                  required: true,
+                  maxlength: 2,
+                  inputmode: "numeric"
+                },
+                errorMessage: error and error.field == "due-date" and { text: error.message }
+              }) }}
+            </div>
+            <div class="govuk-date-input__item">
+              {{ govukInput({
+                label: { text: "Month" },
+                id: "due-date-month",
+                name: "due-date-month",
+                value: month,
+                disabled: isDisabled,
+                classes: "govuk-input--width-2",
+                attributes: {
+                  required: true,
+                  maxlength: 2,
+                  inputmode: "numeric"
+                },
+                errorMessage: error and error.field == "due-date" and { text: error.message }
+              }) }}
+            </div>
+            <div class="govuk-date-input__item">
+              {{ govukInput({
+                label: { text: "Year" },
+                id: "due-date-year",
+                name: "due-date-year",
+                value: year,
+                disabled: isDisabled,
+                classes: "govuk-input--width-4",
+                attributes: {
+                  required: true,
+                  maxlength: 4,
+                  inputmode: "numeric"
+                },
+                errorMessage: error and error.field == "due-date" and { text: error.message }
+              }) }}
+            </div>
+          </div>
+        </fieldset>
+      </div>
+
+        {{ govukSelect({
+          id: "status",
+          name: "status",
+          label: {
+            text: "Status"
+          },
+          items: [
+            {
+              value: "TODO",
+              text: "To Do",
+              selected: task and task.status == "TODO"
+            },
+            {
+              value: "COMPLETED",
+              text: "Completed",
+              selected: task and task.status == "COMPLETED"
+            },
+            {
+              value: "IN_PROGRESS",
+              text: "In Progress",
+              selected: task and task.status == "IN_PROGRESS"
+            }
+          ]
+        }) }}
+    {{ govukButton({ text: "Save" }) }}
+  </form>
+{% endblock %}

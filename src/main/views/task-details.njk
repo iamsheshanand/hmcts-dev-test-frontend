@@ -1,0 +1,32 @@
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% extends "template.njk" %}
+
+{% block content %}
+  <a href="/" class="govuk-back-link">Back to Task List</a>
+  <h1 class="govuk-heading-m">Task Details</h1>
+  {% if not task %}
+    <p class="govuk-body">Task not found.</p>
+  {% else %}
+    {{ govukSummaryList({
+      rows: [
+        { key: { text: "ID" }, value: { text: task.id } },
+        { key: { text: "Title" }, value: { text: task.title } },
+        { key: { text: "Description" }, value: { text: task.description } },
+        { key: { text: "Status" }, value: { text: task.status  } },
+        { key: { text: "Due Date" }, value: { text: task.dueDate  } }
+      ]
+    }) }}
+    <div class="govuk-button-group">
+      <div>
+       <a href="/tasks/{{ task.id }}/edit" class="govuk-button">Edit Task</a>
+      </div>
+      <div>
+  <form method="POST" action="/tasks/{{ task.id }}?_method=DELETE" onsubmit="return confirm('Are you sure?');">
+      {{ govukButton({ text: "Delete Task", type: "submit", classes: "govuk-button--warning" }) }}  
+    </form>
+  </div>
+  </div>
+  {% endif %}
+{% endblock %}
